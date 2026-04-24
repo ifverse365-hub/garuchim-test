@@ -93,6 +93,15 @@ create policy "attempts_anon_select_by_id"
   using (true);
 
 
+-- students: 인증된 사용자(관리자)만 DELETE 가능
+-- (students 를 삭제하면 test_attempts 는 on delete cascade 로 함께 삭제됨)
+drop policy if exists "students_auth_delete" on public.students;
+create policy "students_auth_delete"
+  on public.students for delete
+  to authenticated
+  using (true);
+
+
 -- =========================================================================
 -- 참고: 관리자 계정 만들기
 -- =========================================================================

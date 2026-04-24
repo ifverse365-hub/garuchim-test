@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
 import LogoutButton from './LogoutButton';
+import DeleteButton from './DeleteButton';
 
 export const dynamic = 'force-dynamic';
 
@@ -64,6 +65,7 @@ export default async function AdminDashboard() {
                 <th>응시 시간</th>
                 <th>보호자 연락처</th>
                 <th>상세</th>
+                <th>삭제</th>
               </tr>
             </thead>
             <tbody>
@@ -85,6 +87,9 @@ export default async function AdminDashboard() {
                       <Link href={`/admin/${a.id}`} style={{ color: 'var(--accent)', fontFamily: 'var(--mono)', fontSize: 12, letterSpacing: '0.1em' }}>
                         상세 →
                       </Link>
+                    </td>
+                    <td>
+                      <DeleteButton attemptId={a.id} studentName={a.student?.name ?? '—'} />
                     </td>
                   </tr>
                 );
