@@ -1,5 +1,8 @@
 import Link from 'next/link';
-import { questions } from '@/data/questions';
+import { questionsByLevel } from '@/data/questions';
+
+const LEVEL_COUNT = Object.keys(questionsByLevel).length;
+const PER_LEVEL = questionsByLevel.L1.length;
 
 export default function Home() {
   return (
@@ -11,9 +14,9 @@ export default function Home() {
         우리 아이의 <em style={{ color: 'var(--accent)', fontStyle: 'italic' }}>시작점</em>을 찾아봅시다.
       </h1>
       <p style={{ fontSize: 17, color: 'var(--ink-soft)', lineHeight: 1.8, marginBottom: 40 }}>
-        총 <strong>{questions.length}문항</strong>의 테스트로 우리 아이에게 맞는 코딩 학습 레벨을 진단합니다.
+        <strong>{LEVEL_COUNT}개 레벨 · 각 {PER_LEVEL}문항</strong>의 테스트로 우리 아이에게 맞는 코딩 학습 레벨을 진단합니다.
         사고력·블록 코딩·텍스트 코딩·알고리즘 네 영역을 균형 있게 측정하며,
-        응시자의 현재 수준에 맞는 <strong>추천 레벨</strong>과 함께 간략 결과를 안내해 드립니다.
+        응시한 레벨의 결과에 따라 <strong>승급·적정·하위</strong> 과정을 추천해 드립니다.
       </p>
 
       <div className="card-deep" style={{ marginBottom: 32 }}>

@@ -8,6 +8,7 @@ export const dynamic = 'force-dynamic';
 type AttemptRow = {
   id: string;
   created_at: string;
+  test_level: string | null;
   total_score: number;
   max_score: number;
   level_recommended: string;
@@ -20,7 +21,7 @@ export default async function AdminDashboard() {
 
   const { data: attempts, error } = await supabase
     .from('test_attempts')
-    .select('id, created_at, total_score, max_score, level_recommended, duration_sec, student:students(name, grade, parent_phone)')
+    .select('id, created_at, test_level, total_score, max_score, level_recommended, duration_sec, student:students(name, grade, parent_phone)')
     .order('created_at', { ascending: false })
     .limit(200);
 
@@ -60,6 +61,7 @@ export default async function AdminDashboard() {
                 <th>응시 일시</th>
                 <th>학생</th>
                 <th>학년</th>
+                <th>응시 레벨</th>
                 <th>점수</th>
                 <th>추천 레벨</th>
                 <th>응시 시간</th>
@@ -79,6 +81,7 @@ export default async function AdminDashboard() {
                     <td style={{ fontFamily: 'var(--mono)', fontSize: 12 }}>{dateStr}</td>
                     <td><strong>{a.student?.name ?? '—'}</strong></td>
                     <td>{a.student?.grade ?? '—'}</td>
+                    <td style={{ fontFamily: 'var(--mono)' }}>{a.test_level ?? '—'}</td>
                     <td style={{ fontFamily: 'var(--mono)' }}>{a.total_score} / {a.max_score}</td>
                     <td><span className="lvl-badge">{a.level_recommended}</span></td>
                     <td style={{ fontFamily: 'var(--mono)', fontSize: 12 }}>{min}:{String(sec).padStart(2, '0')}</td>

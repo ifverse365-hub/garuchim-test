@@ -34,6 +34,7 @@ create index if not exists students_created_at_idx
 create table if not exists public.test_attempts (
   id                uuid primary key default gen_random_uuid(),
   student_id        uuid not null references public.students(id) on delete cascade,
+  test_level        text not null default 'L1',
   total_score       int not null,
   max_score         int not null,
   level_recommended text not null,
@@ -43,10 +44,16 @@ create table if not exists public.test_attempts (
   created_at        timestamptz not null default now()
 );
 
+-- 기존 DB 에 이 컬럼이 없는 경우를 위한 마이그레이션 (재실행 안전)
+alter table public.test_attempts
+  add column if not exists test_level text not null default 'L1';
+
 create index if not exists test_attempts_created_at_idx
   on public.test_attempts (created_at desc);
 create index if not exists test_attempts_student_id_idx
   on public.test_attempts (student_id);
+create index if not exists test_attempts_test_level_idx
+  on public.test_attempts (test_level);
 
 
 -- =========================================================================

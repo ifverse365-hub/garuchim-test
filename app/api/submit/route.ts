@@ -1,24 +1,37 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
-import { questions, recommendLevel, TOTAL_POINTS } from '@/data/questions';
+import {
+  questionsByLevel,
+  getMaxScore,
+  interpretResult,
+  type QuestionLevel,
+} from '@/data/questions';
+
+const VALID_LEVELS: QuestionLevel[] = ['L1', 'L2', 'L3', 'L4', 'L5'];
 
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { taker, answers, durationSec } = body as {
+    const { taker, testLevel, answers, durationSec } = body as {
       taker: { name: string; grade: string; parentName?: string; parentPhone?: string };
-      answers: Record<number, number>;
+      testLevel: QuestionLevel;
+      answers: Record<string, number>;
       durationSec: number;
     };
 
-    // 최소 유효성 검사
     if (!taker?.name || !taker?.grade) {
       return NextResponse.json({ error: '응시자 정보가 누락되었습니다' }, { status: 400 });
     }
 
-    // 서버 측에서 직접 채점 (클라이언트 점수 믿지 않기)
+    if (!VALID_LEVELS.includes(testLevel)) {
+      return NextResponse.json({ error: '잘못된 레벨입니다' }, { status: 400 });
+    }
+
+    const levelQuestions = questionsByLevel[testLevel];
+    const maxScore = getMaxScore(testLevel);
+
     let score = 0;
-    const detail = questions.map((q) => {
+    const detail = levelQuestions.map((q) => {
       const picked = answers[q.id];
       const isCorrect = picked === q.correctIndex;
       if (isCorrect) score += q.points;
@@ -32,11 +45,10 @@ export async function POST(request: Request) {
       };
     });
 
-    const recommended = recommendLevel(score, TOTAL_POINTS);
+    const result = interpretResult(testLevel, score);
 
-    // 카테고리별 점수 분석
     const categoryScores: Record<string, { got: number; max: number }> = {};
-    for (const q of questions) {
+    for (const q of levelQuestions) {
       const key = q.category;
       if (!categoryScores[key]) categoryScores[key] = { got: 0, max: 0 };
       categoryScores[key].max += q.points;
@@ -45,7 +57,6 @@ export async function POST(request: Request) {
 
     const supabase = createClient();
 
-    // 1) 학생 레코드 저장
     const { data: studentRow, error: studentErr } = await supabase
       .from('students')
       .insert({
@@ -62,14 +73,14 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'DB 오류: 학생 저장 실패' }, { status: 500 });
     }
 
-    // 2) 응시 기록 저장
     const { data: attemptRow, error: attemptErr } = await supabase
       .from('test_attempts')
       .insert({
         student_id: studentRow.id,
+        test_level: testLevel,
         total_score: score,
-        max_score: TOTAL_POINTS,
-        level_recommended: recommended.level,
+        max_score: maxScore,
+        level_recommended: result.recommendedLevel,
         duration_sec: durationSec,
         answers_detail: detail,
         category_scores: categoryScores,
@@ -86,8 +97,8 @@ export async function POST(request: Request) {
       ok: true,
       attemptId: attemptRow.id,
       score,
-      maxScore: TOTAL_POINTS,
-      recommended,
+      maxScore,
+      result,
     });
   } catch (err) {
     console.error('submit error', err);
