@@ -81,8 +81,8 @@ export default async function ResultPage({ params }: { params: { id: string } })
         <p style={{ fontSize: 15, color: 'var(--ink-soft)', marginBottom: 20 }}>
           상담을 원하시면 학원으로 연락 주세요.
         </p>
-        <a href="tel:050714480134" className="btn btn-primary" style={{ marginRight: 12 }}>
-          학원 전화 0507-1448-0134
+        <a href="tel:0649009982" className="btn btn-primary" style={{ marginRight: 12 }}>
+          학원 전화 064-900-9982
         </a>
         <Link href="/" className="btn btn-ghost">
           처음으로 돌아가기

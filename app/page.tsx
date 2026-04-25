@@ -34,7 +34,7 @@ export default function Home() {
       </Link>
 
       <div style={{ marginTop: 60, paddingTop: 24, borderTop: '1px solid var(--paper-line)', fontSize: 12, color: 'var(--muted)', textAlign: 'center' }}>
-        문의 <a href="tel:050714480134" style={{ color: 'var(--accent)' }}>0507-1448-0134</a> ·
+        문의 <a href="tel:0649009982" style={{ color: 'var(--accent)' }}>064-900-9982</a> ·
         가르침에듀 코딩학원
       </div>
     </main>
