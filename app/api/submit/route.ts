@@ -57,18 +57,22 @@ export async function POST(request: Request) {
 
     const supabase = createClient();
 
-    const { data: studentRow, error: studentErr } = await supabase
+    // id 를 미리 생성한다. 익명 응시자는 students 를 SELECT 할 권한이 없으므로
+    // .select() 로 방금 넣은 행을 읽어오면 RLS 에 막힌다(학생 개인정보 보호 정책).
+    // 따라서 read-back 없이 INSERT 만 수행한다.
+    const studentId = crypto.randomUUID();
+
+    const { error: studentErr } = await supabase
       .from('students')
       .insert({
+        id: studentId,
         name: taker.name,
         grade: taker.grade,
         parent_name: taker.parentName || null,
         parent_phone: taker.parentPhone || null,
-      })
-      .select('id')
-      .single();
+      });
 
-    if (studentErr || !studentRow) {
+    if (studentErr) {
       console.error('student insert error', studentErr);
       return NextResponse.json({ error: 'DB 오류: 학생 저장 실패' }, { status: 500 });
     }
@@ -76,7 +80,7 @@ export async function POST(request: Request) {
     const { data: attemptRow, error: attemptErr } = await supabase
       .from('test_attempts')
       .insert({
-        student_id: studentRow.id,
+        student_id: studentId,
         test_level: testLevel,
         total_score: score,
         max_score: maxScore,
